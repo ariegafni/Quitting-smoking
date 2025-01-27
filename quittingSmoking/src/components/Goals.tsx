@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { sendDailyGoal, sendWeeklyGoal } from '../API/api';
 
 const Goals: React.FC = () => {
   const [dailyGoal, setDailyGoal] = useState<number | undefined>(undefined);
@@ -6,38 +7,51 @@ const Goals: React.FC = () => {
   const [dailyDate, setDailyDate] = useState<string>('');
   const [weeklyDate, setWeeklyDate] = useState<string>('');
 
-  // פונקציה לטיפול בשינוי הערכים של היעד היומי
-  const handleDailyGoalChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setDailyGoal(Number(event.target.value));
-  };
-
-  // פונקציה לטיפול בשינוי הערכים של היעד השבועי
-  const handleWeeklyGoalChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setWeeklyGoal(Number(event.target.value));
-  };
-
-  // פונקציה לטיפול בשינוי תאריך ליעד היומי
+  // טיפול בשינויי קלט
   const handleDailyDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setDailyDate(event.target.value);
   };
 
-  // פונקציה לטיפול בשינוי תאריך ליעד השבועי
   const handleWeeklyDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setWeeklyDate(event.target.value);
   };
 
-  // פונקציה לטיפול ב-Submit של היעד היומי
-  const handleDailySubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    console.log(`יעד יומי: ${dailyGoal}, תאריך: ${dailyDate}`);
-    // שליחת הנתונים ל-API או שמירה במערכת
+  const handleDailyGoalChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setDailyGoal(Number(event.target.value));
   };
 
-  // פונקציה לטיפול ב-Submit של היעד השבועי
-  const handleWeeklySubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleWeeklyGoalChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setWeeklyGoal(Number(event.target.value));
+  };
+
+  // קריאה לשליחת יעד יומי
+  const handleDailySubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log(`יעד שבועי: ${weeklyGoal}, תאריך: ${weeklyDate}`);
-    // שליחת הנתונים ל-API או שמירה במערכת
+    if (dailyGoal && dailyDate) {
+      try {
+        const response = await sendDailyGoal(dailyGoal, dailyDate);
+        console.log("Daily goal sent successfully:", response);
+      } catch (error) {
+        console.error("Failed to send daily goal:", error);
+      }
+    } else {
+      console.error("Please provide both a daily goal and a date.");
+    }
+  };
+
+  // קריאה לשליחת יעד שבועי
+  const handleWeeklySubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (weeklyGoal && weeklyDate) {
+      try {
+        const response = await sendWeeklyGoal(weeklyGoal, weeklyDate);
+        console.log("Weekly goal sent successfully:", response);
+      } catch (error) {
+        console.error("Failed to send weekly goal:", error);
+      }
+    } else {
+      console.error("Please provide both a weekly goal and a date.");
+    }
   };
 
   return (
@@ -45,7 +59,7 @@ const Goals: React.FC = () => {
       {/* טופס יעד יומי */}
       <form onSubmit={handleDailySubmit}>
         <label>
-          select date:
+          Select date:
           <input
             type="date"
             value={dailyDate}
@@ -53,7 +67,7 @@ const Goals: React.FC = () => {
           />
         </label>
         <label>
-          daily goal:
+          Daily goal:
           <input
             type="number"
             value={dailyGoal || ''}
@@ -61,13 +75,13 @@ const Goals: React.FC = () => {
           />
           Cigarettes
         </label>
-        <button type="submit">save daily goal  </button>
+        <button type="submit">Save daily goal</button>
       </form>
 
       {/* טופס יעד שבועי */}
       <form onSubmit={handleWeeklySubmit}>
         <label>
-        select week:
+          Select week:
           <input
             type="date"
             value={weeklyDate}
@@ -75,7 +89,7 @@ const Goals: React.FC = () => {
           />
         </label>
         <label>
-          weekly goal
+          Weekly goal:
           <input
             type="number"
             value={weeklyGoal || ''}
@@ -83,7 +97,7 @@ const Goals: React.FC = () => {
           />
           Cigarettes
         </label>
-        <button type="submit">  save weekly goal</button>
+        <button type="submit">Save weekly goal</button>
       </form>
     </div>
   );
